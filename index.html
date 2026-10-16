@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TeNGA Huni</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Telegram Mini App WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adsgram and Monetag SDKs -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+</head>
+<body>
+    <div id="app-container">
+
+        <!-- Mandatory Channel Verification Pop-Up (লগইন গেটকিপিং) -->
+        <div id="channel-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>⚠️ চ্যানেল সাবস্ক্রিপশন আবশ্যক</h3>
+                <p>অ্যাপ ব্যবহার করতে নিচের চ্যানেলগুলোতে জয়েন করুন। চ্যানেল লিভ নিলে উইথড্রাল বাতিল হতে পারে!</p>
+                <div id="channel-list-container" class="channel-list">
+                    <!-- Dynamic Dynamic 6 slots will render here -->
+                </div>
+                <button id="verify-channels-btn" class="btn primary-btn">আমি জয়েন করেছি (Verify)</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Header Tabs -->
+        <header class="app-header">
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-target="home-tab">Home</button>
+                <button class="tab-btn" data-target="ad-tab">AD</button>
+                <button class="tab-btn" data-target="task-tab">Task</button>
+                <button class="tab-btn" data-target="sponsored-tab">Sponsored</button>
+                <button class="tab-btn" data-target="wallet-tab">Wallet</button>
+            </nav>
+        </header>
+
+        <!-- Dynamic Banner Slider (5 Slots Carousel) -->
+        <section class="banner-carousel-container">
+            <div class="carousel-track" id="carousel-track">
+                <!-- Slot 1: Tournament -->
+                <div class="carousel-slide card" id="slide-tournament">
+                    <h4>🏆 টুর্নামেন্ট ও লিডারবোর্ড</h4>
+                    <p id="tournament-timer">মেয়াদ: শেষ হচ্ছে...</p>
+                    <div id="leaderboard-preview"></div>
+                </div>
+                <!-- Slot 2: Promo Code -->
+                <div class="carousel-slide card" id="slide-promo">
+                    <h4>🎁 প্রমো কোড ক্লেম</h4>
+                    <input type="text" id="promo-input" placeholder="প্রমো কোড লিখুন">
+                    <button id="claim-promo-btn" class="btn sm-btn">ক্লেম করুন</button>
+                </div>
+                <!-- Slot 3: Smart Link Aggregator -->
+                <div class="carousel-slide card" id="slide-smartlink">
+                    <h4>🔗 স্মার্ট লিংক</h4>
+                    <p>ক্লিক: <span id="link-clicks">0</span> | আয়: $<span id="link-earnings">0.00</span></p>
+                    <button id="copy-smartlink-btn" class="btn sm-btn">লিংক কপি করুন</button>
+                </div>
+                <!-- Slot 4: Coin Buy/Sell Hub -->
+                <div class="carousel-slide card" id="slide-coins">
+                    <h4>🔀 কয়েন কেনা/বেচা Hub</h4>
+                    <p>Poppo, Chamet, Tello ইত্যাদির জন্য</p>
+                    <button onclick="openCoinTradeModal()" class="btn sm-btn">লেনদেন শুরু করুন</button>
+                </div>
+                <!-- Slot 5: Host Agency -->
+                <div class="carousel-slide card" id="slide-agency">
+                    <h4>🏢 হোস্ট এজেন্সি জয়েন</h4>
+                    <div id="agency-links-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAIN VIEWS -->
+        <main class="content-area">
+            
+            <!-- HOME VIEW -->
+            <section id="home-tab" class="view-tab active">
+                <div class="card user-profile">
+                    <h3>স্বাগতম, <span id="user-name">User</span>!</h3>
+                    <p>আপনার ব্যালেন্স: <strong id="home-balance">0.00</strong> BDT</p>
+                </div>
+            </section>
+
+            <!-- AD PAGE VIEW -->
+            <section id="ad-tab" class="view-tab hidden">
+                <h2>📺 অ্যাড দেখে আয় করুন</h2>
+                <div class="ad-card card">
+                    <h3>Premium AD (Monetag Interstitial)</h3>
+                    <p>দৈনিক সীমা: <span id="premium-ad-count">0</span>/20</p>
+                    <button id="watch-premium-ad-btn" class="btn">অ্যাড দেখুন (15s)</button>
+                </div>
+                <div class="ad-card card">
+                    <h3>Smart AD (Telegram Bot)</h3>
+                    <p>দৈনিক সীমা: <span id="smart-ad-count">0</span>/10</p>
+                    <button id="watch-smart-ad-btn" class="btn">স্মার্ট অ্যাড দেখুন</button>
+                </div>
+                <div class="ad-card card">
+                    <h3>Pro Premium AD (Adsgram SDK)</h3>
+                    <p>দৈনিক সীমা: <span id="pro-ad-count">0</span>/5</p>
+                    <button id="watch-adsgram-btn" class="btn">Pro অ্যাড দেখুন</button>
+                </div>
+            </section>
+
+            <!-- TASK PAGE VIEW -->
+            <section id="task-tab" class="view-tab hidden">
+                <h2>📋 উপলব্ধ টাস্কসমূহ</h2>
+                <div id="task-list-container">
+                    <!-- JS দিয়ে ডায়নামিক টাস্ক রেন্ডার হবে -->
+                </div>
+            </section>
+
+            <!-- SPONSORED PAGE VIEW -->
+            <section id="sponsored-tab" class="view-tab hidden">
+                <h2>📣 স্পন্সরড প্রমোশন করুন</h2>
+                <form id="sponsored-form" class="card-form">
+                    <input type="text" placeholder="প্রমোশন নাম" required id="sp-name">
+                    <input type="text" placeholder="বাটন টেক্সট" required id="sp-btn-text">
+                    <input type="url" placeholder="টার্গেট URL" required id="sp-url">
+                    <select id="sp-payment-method">
+                        <option value="bkash">bKash</option>
+                        <option value="nagad">Nagad</option>
+                    </select>
+                    <p>রেট: <span id="sp-rate">100</span> BDT</p>
+                    <input type="text" placeholder="Transaction ID" required id="sp-txid">
+                    <button type="submit" class="btn">জমা দিন</button>
+                </form>
+            </section>
+
+            <!-- WALLET PAGE VIEW -->
+            <section id="wallet-tab" class="view-tab hidden">
+                <div class="card wallet-summary">
+                    <h3>মোট আয়: <span id="w-total">0</span> BDT</h3>
+                    <h3>বর্তমান ব্যালেন্স: <span id="w-balance">0</span> BDT</h3>
+                </div>
+                
+                <form id="withdraw-form" class="card-form">
+                    <h3>টাকা তুলুন (Withdraw)</h3>
+                    <select id="wd-method">
+                        <option value="bkash">bKash</option>
+                        <option value="nagad">Nagad</option>
+                    </select>
+                    <input type="number" placeholder="পরিমাণ (BDT)" id="wd-amount" required>
+                    <input type="text" placeholder="মোবাইল নম্বর" id="wd-account" required>
+                    <input type="password" placeholder="সিকিউরিটি PIN" id="wd-pin" required>
+                    <button type="submit" class="btn primary-btn">উইথড্র রিকুয়েস্ট দিন</button>
+                </form>
+
+                <div class="settings-hub">
+                    <h3>সেটিংস ও সাপোর্ট</h3>
+                    <button id="theme-toggle" class="btn sm-btn">থিম পরিবর্তন (Dark/Light)</button>
+                    <button id="clear-cache-btn" class="btn sm-btn">ক্যাশ পরিস্কার করুন</button>
+                    <a href="https://t.me/support_handle" target="_blank" class="btn sm-btn support-link">সরাসরি টেলিগ্রাম সাপোর্ট</a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Firebase CDN SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
